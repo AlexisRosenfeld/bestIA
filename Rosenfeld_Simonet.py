@@ -2,6 +2,7 @@ import interfaces
 import copy 
 from interfaces import Token
 
+l_b = []
 at = Token.EMPTY
 ne =0 
 nr = 0 
@@ -32,7 +33,7 @@ def mp(arg):
 
 
 def calc_m():
-    global dps
+    global dps, dv,dh,diag1,diag2
 
     dv = [[j for i in range(7)] for j in range(6) ]
     dvp = [[j for i in range(7)] for j in range(5,-1,-1)]
@@ -153,7 +154,7 @@ def calc_m():
 
                 if diag2[i][j]== 1 : 
                     if dh[i][j]== 0 or dv[i][j]== 5 : 
-                        dps[i][j].append([[i,j],[i-1,j+1],[i-2,j-2],[i-3,j-3]])
+                        dps[i][j].append([[i,j],[i-1,j+1],[i-2,j+2],[i-3,j+3]])
                     if (dh[i][j] == 4 and dv[i][j]== 4 ) or (dh[i][j]== 1 and dv[i][j]== 2): 
                         dps[i][j].append([[i + 1 , j -1],[i,j],[i-1, j + 1 ],[i-2,j + 2 ]])
                     if (dh[i][j]== 2 and dv[i][j] == 1 ) or (dh[i][j]== 5 and dv[i][j]== 3): 
@@ -186,20 +187,50 @@ def calc_m():
 
 
 
+def calc_mb(b): 
+    mb = [[b.column(j)[i] for j in range(7)] for i in range(6)]
+    return mb
 
+def calc_pos(m_b):
+    posr = []
+    posy = []
+    r = Token.RED
+    y = Token.YELLOW
 
+    # Parcourir chaque sous-array dans la matrice m_b
+    for i, sous_array in enumerate(m_b):
+        for j, valeur in enumerate(sous_array):
+            # Vérifier la valeur et ajouter la position à la liste correspondante
+            if valeur == r:
+                posr.append([i, j])
+            elif valeur == y:
+                posy.append([i, j])
+    return [posr,posy]
 
+def calc_p(po, po_a): 
+    p = 0 
+    for i in po:
+        for j in dps[i[0]][i[1]]:
+            b = 1 
+            
 
+            for k in j:
+                if k in po_a: 
+                    b = 0 
+                    break
+            if b == 1:
+                p += 1 
+
+    return p
                         
 
 
 
    
 
-calc_m()
 
 class GroupeDavidStrategy(interfaces.Strategy):
-    global ne, nr, ny, posr, posy, pose, pr, py 
+    global ne, nr, ny, posr, posy, pose, pr, py , l_b
 
  
 
@@ -213,7 +244,7 @@ class GroupeDavidStrategy(interfaces.Strategy):
         return "Alexis Rosenfeld, David Simonet"
 
     def play(self, b: interfaces.Board, t: interfaces.Token) -> int:
-        global ne, nr, ny, posr, posy, pose, pr, py, at , n , p, stra
+        global ne, nr, ny, posr, posy, pose, pr, py, at , stra, apos, pos, l_b
         stra = ""
         r = Token.RED
         y = Token.YELLOW
@@ -221,7 +252,7 @@ class GroupeDavidStrategy(interfaces.Strategy):
         # playable_columns = [index for index in range(current_board.width) if
         #                     interfaces.Token.EMPTY in current_board.column(index)]
         # secrets.choice(playable_columns)
-        m_b = [[b.column(j)[i] for j in range(7)] for i in range(6)]
+        mb = calc_mb(b) 
         b_p = [[[] for _ in range(6)] for _ in range(7)]
 
 
@@ -230,10 +261,10 @@ class GroupeDavidStrategy(interfaces.Strategy):
             return reversed_arr
 
         # Reverse each sub-array (row) in the nested list
-        i_m_b = reverse_nested_list(m_b)
+        i_m_b = reverse_nested_list(mb)
 
-        width = len(m_b[0])
-        height = len(m_b)
+        width = len(mb[0])
+        height = len(mb)
 
         # print(m_b[0][0])
         # print(m_b[2][0])
@@ -248,7 +279,7 @@ class GroupeDavidStrategy(interfaces.Strategy):
 
 
         # Parcourir chaque tableau dans la matrice m_b
-        for sous_array in m_b:
+        for sous_array in mb:
             for valeur in sous_array:
                 # Incrémenter le compteur correspondant à la valeur
                 if valeur == r:
@@ -258,20 +289,7 @@ class GroupeDavidStrategy(interfaces.Strategy):
                 elif valeur == e:
                     ne += 1
 
-        posr = []
-        posy = []
-        pose = []
-
-        # Parcourir chaque sous-array dans la matrice m_b
-        for i, sous_array in enumerate(m_b):
-            for j, valeur in enumerate(sous_array):
-                # Vérifier la valeur et ajouter la position à la liste correspondante
-                if valeur == r:
-                    posr.append((i, j))
-                elif valeur == y:
-                    posy.append((i, j))
-                elif valeur == e:
-                    pose.append((i, j))
+    
 
         # print(b)
         # print(nr)
@@ -279,50 +297,25 @@ class GroupeDavidStrategy(interfaces.Strategy):
         # print(ne)
         # print(positions_r)
 
-        # Vérifier si la variable spécifique existe dans l'espace de noms global
-        if 'dps' not in globals():
-            calc_m()  # Appeler la fonction si la variable n'existe pas
-        pr = 0 
-        for i in posr: 
-            b = 1 
-            for j in dps[i[0]][i[1]]:
+       
+        calc_m()
 
-                for k in j:
-                    if m_b[k[0]][k[1]] == y: 
-                        b = 0 
-                        break
-                if b == 1: 
-                    pr += 1 
-        for i in posy: 
-            b = 1 
-            for j in dps[i[0]][i[1]]:
+       
+        l_b = [[b,[0]]]
 
-                for k in j:
-                    if m_b[k[0]][k[1]] == r: 
-                        b = 0 
-                        break
-                if b == 1: 
-                    py += 1 
-        if t == r : 
-            at = y
-            an = ny
-            ap = py
-            p = pr 
-            n = nr 
-        if t == y : 
-            at == r
-            an = nr
-            ap = pr
-            p = py 
-            n = ny 
+        
 
-        if n == an: 
-            stra = "min"  
-        else : 
-            stra = "max" 
+        
+
+       
+
+
+       
+
+        
         
 
 
-        return 
+        return 1
 
 stra = GroupeDavidStrategy()
