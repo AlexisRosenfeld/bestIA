@@ -1,62 +1,8 @@
+Le projet puissance 4 du groupe David 
 
+La stratégie se trouve sous 'Rosenfeld_Simonet.py' 
 
-I have a 2 by 2 matrix  7*6 
-
-[[1][][][][][][]]
-[[1][][][][][][]]
-[[1][][][][][][]]
-[[1][][][][][][]]
-[[1][][][][][][]]
-[[1][][][][][][]]
-[[1][][][][][][]]
-
-I accede this matrix with 
-
-m[row][column]
-
-i create a 7*6 matrix with empty array 
-em = []
-
- em = [[]  for h in range(6)] for w in range(7)]
-
-I want to calculate the distance with the first border 
-
-it the index of the column 
-d1 = [[[0][1][2][3][4][5][6]]
-[[0][1][2][3][4][5][6]]
-[[0][1][2][3][4][5][6]]
-[[0][1][2][3][4][5][6]]
-[[0][1][2][3][4][5][6]]
-[[0][1][2][3][4][5][6]]
-
-
-d2 = [[[[6][5][4][3][2][1][0]]
-[[[6][5][4][3][2][1][0]]
-[[[6][5][4][3][2][1][0]]
-[[[6][5][4][3][2][1][0]]
-[[[6][5][4][3][2][1][0]]
-[[[6][5][4][3][2][1][0]]]
+La description des fonctions et des variables ce trouve sous 'var_proj.xlsx' 
 
 
 
-I want to caclulate the distance with the bottom 
-
-
-d3 = [[5][5][5][5][5][5][5][5]
-[4][4][4][4][4][4][4][4]
-[3][3][3][3][3][3][3][3]
-[2][2][2][2][2][2][2][2]
-[1][1][1][1][1][1][1][1]
-[0][0][0][0][0][0][0][0]]
-
-
-d4 = [[0][0][0][0][0][0][0][0]
-[1][1][1][1][1][1][1][1]
-[2][2][2][2][2][2][2][2]
-[3][3][3][3][3][3][3][3]
-[4][4][4][4][4][4][4][4]
-[5][5][5][5][5][5][5][5]]
-
-for h in range(6):
-	for w in range(7):
-	em.column[
