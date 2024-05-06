@@ -2,7 +2,11 @@ import interfaces
 import copy 
 from interfaces import Token
 
-l_b = []
+
+r = Token.RED.value
+y = Token.YELLOW.value
+e = Token.EMPTY.value
+
 at = Token.EMPTY
 ne =0 
 nr = 0 
@@ -188,14 +192,12 @@ def calc_m():
 
 
 def calc_mb(b): 
-    mb = [[b.column(j)[i] for j in range(7)] for i in range(6)]
+    mb = [[b.column(j)[i].value for j in range(7)] for i in range(6)]
     return mb
 
 def calc_pos(m_b):
     posr = []
     posy = []
-    r = Token.RED
-    y = Token.YELLOW
 
     # Parcourir chaque sous-array dans la matrice m_b
     for i, sous_array in enumerate(m_b):
@@ -224,13 +226,56 @@ def calc_p(po, po_a):
     return p
                         
 
+def calc_n(mb):
+    nr = 0
+    ny = 0
+    ne = 0
 
+    for sous_array in mb:
+        for valeur in sous_array:
+            # Incrémenter le compteur correspondant à la valeur
+            if valeur == r:
+                nr += 1
+            elif valeur == y:
+                ny += 1
+            elif valeur == e:
+                ne += 1
+    test = [nr,ny,ne]
+    print(test)
 
-   
+def calc_lb(b,t,m,n):
+    global lb
+    if not lb:
+        lb = [[[]]] #profondeur; colonne; élément ; dim ( pour board ou seq) 
+        lb[0][0].append([[b],[]])
+    lb.append([])
+    mi = 0 
+    for i in lb[m]:
+        
+        for j in range(7):
+            if Token.EMPTY in i[0][0][0].column(j) :
+                bp = copy.deepcopy(i[0][0][0])
+                bp.play(j,t)
+                test = copy.deepcopy(i[0][1])
+                test.append(j)
+                lb[m+1].append([[[bp],test]])
+        mi += 1 
+            
+    m += 1
+    if m < n : 
+        if t == Token.RED :
+            t = Token.YELLOW
+        else :
+            t = Token.RED
+        calc_lb(b,t,m,n)
+    return lb 
+
+            
+    
 
 
 class GroupeDavidStrategy(interfaces.Strategy):
-    global ne, nr, ny, posr, posy, pose, pr, py , l_b
+    global ne, nr, ny, posr, posy, pose, pr, py , mb
 
  
 
@@ -244,64 +289,62 @@ class GroupeDavidStrategy(interfaces.Strategy):
         return "Alexis Rosenfeld, David Simonet"
 
     def play(self, b: interfaces.Board, t: interfaces.Token) -> int:
-        global ne, nr, ny, posr, posy, pose, pr, py, at , stra, apos, pos, l_b
-        stra = ""
-        r = Token.RED
-        y = Token.YELLOW
-        e = Token.EMPTY
-        # playable_columns = [index for index in range(current_board.width) if
-        #                     interfaces.Token.EMPTY in current_board.column(index)]
-        # secrets.choice(playable_columns)
-        mb = calc_mb(b) 
-        b_p = [[[] for _ in range(6)] for _ in range(7)]
+        global ne, nr, ny, posr, posy, pose, pr, py, at , stra, apos, pos, lb, lp,min_max, test2, test3 
 
-
-        def reverse_nested_list(arr):
-            reversed_arr = [sub_arr[::-1] for sub_arr in arr]
-            return reversed_arr
-
-        # Reverse each sub-array (row) in the nested list
-        i_m_b = reverse_nested_list(mb)
-
-        width = len(mb[0])
-        height = len(mb)
-
-        # print(m_b[0][0])
-        # print(m_b[2][0])
-        # print(m_b[2][1])
-
-        nr = 0
-        ny = 0
-        ne = 0
-
-        
-
-
-
-        # Parcourir chaque tableau dans la matrice m_b
-        for sous_array in mb:
-            for valeur in sous_array:
-                # Incrémenter le compteur correspondant à la valeur
-                if valeur == r:
-                    nr += 1
-                elif valeur == y:
-                    ny += 1
-                elif valeur == e:
-                    ne += 1
-
+         
     
 
-        # print(b)
-        # print(nr)
-        # print(ny)
-        # print(ne)
-        # print(positions_r)
-
-       
         calc_m()
+        
+        lb = []
+
+        calc_lb(b,t,0,2)
+
+        lp = []
+
+        for i in range(2,-1,-1):
+            lp.append([])
+
+        for i in range(2,-1,-1): 
+            for j in lb[i] : 
+                test = calc_mb(j[0][0][0])
+                test1 = calc_pos(test)
+                test2 = calc_p(test1[0],test1[1])
+                test3 = calc_p(test1[1],test1[0])
+                test4 = test2 - test3
+                lp[i].append([test4, j[0][1]])
+
+        min_max = []
+        ni = 0
+        for i in range(2,0,-1): 
+            min_max.append([])
+            for j in range(7):
+                v1 = [sub[0] for sub in lp[i] if sub[1][i-1] == j ]
+                if not v1 :
+                    v1 = "plein" 
+                min_max[ni].append(v1)
+            ni +=1 
+        for i in range(7):
+            if min_max[0][i] != "plein" :
+                min_max[1][i] = min(min_max[0][i]) 
+            else : 
+                min_max[1][i] = "plein"
+
+        sous_l = [x for x in min_max[1] if x != 'plein']
+        
+        index_max = min_max[1].index(max(sous_l))
+
+
+        
+
+
+        
+
+
+
+
 
        
-        l_b = [[b,[0]]]
 
         
 
@@ -316,6 +359,4 @@ class GroupeDavidStrategy(interfaces.Strategy):
         
 
 
-        return 1
-
-stra = GroupeDavidStrategy()
+        return  index_max 
