@@ -1,0 +1,122 @@
+import time
+import math
+import copy
+import interfaces
+
+
+class GroupeDavid(interfaces.Strategy):
+
+    def __init__(self, depth: int, limit_time: float = 0.95):
+        self.depth = depth
+        self.limit_time = limit_time
+
+    def available_columns(self, current_board: interfaces.Board) -> list[int]:
+        return [i for i in range(current_board.width)
+                if interfaces.Token.EMPTY in current_board.column(i)]
+
+    def authors(self) -> str:
+        return "Rosenfeld, Simonet"
+
+    def play(self, current_board: interfaces.Board, your_token: interfaces.Token,
+             opponent_token: interfaces.Token) -> int:
+        start_time = time.time()
+        best_score = -math.inf
+        best_move = None
+
+        for column in self.available_columns(current_board):
+
+            board_copy = copy.deepcopy(current_board)
+
+            board_copy.play(column, your_token)
+
+            score = self.minimax(board_copy, self.depth - 1, -math.inf, math.inf, False,
+                                 your_token, opponent_token, start_time, )
+
+            if score > best_score:
+                best_score = score
+                best_move = column
+
+            if time.time() - start_time > self.limit_time:
+                break
+
+        return best_move
+
+    def minimax(
+            self,
+            current_board: interfaces.Board,
+            depth: int,
+            alpha: float,
+            beta: float,
+            is_maximizing: bool,
+            your_token: interfaces.Token,
+            opponent_token: interfaces.Token,
+            start_time: float,
+    ) -> float:
+
+        if time.time() - start_time > self.limit_time:
+            return -math.inf if is_maximizing else math.inf
+
+        if depth == 0:
+            return self.evaluate_board(current_board, your_token, opponent_token)
+
+        if is_maximizing:
+            best_score = -math.inf
+            for column in self.available_columns(current_board):
+                current_board.play(column, your_token)
+                score = self.minimax(
+                    current_board,
+                    depth - 1,
+                    alpha,
+                    beta,
+                    False,
+                    your_token,
+                    opponent_token,
+                    start_time,
+                )
+                best_score = max(best_score, score)
+                alpha = max(alpha, best_score)
+                if alpha >= beta:
+                    break
+
+                if time.time() - start_time > self.limit_time:
+                    break
+            return best_score
+
+    def evaluate_board(self, current_board: interfaces.Board, your_token: interfaces.Token,
+                       opponent_token: interfaces.Token) -> int:
+        score = 0
+
+        for line in range(current_board.height):
+            score += self.evaluate_line(current_board.line(line), your_token, opponent_token)
+        for i in range(current_board.width):
+            score += self.evaluate_line(current_board.column(i), your_token, opponent_token)
+        for diag in current_board.diagonals():
+            score += self.evaluate_line(diag, your_token, opponent_token)
+
+        return score
+
+    def evaluate_line(self, line: list[interfaces.Token], your_token: interfaces.Token,
+                      opponent_token: interfaces.Token) -> int:
+        score = 0
+
+        current_player_count = 0
+        current_opponent_count = 0
+
+        for token in line:
+            if token == your_token:
+                current_player_count += 1
+                current_opponent_count = 0
+            elif token == opponent_token:
+                current_opponent_count += 1
+                current_player_count = 0
+            else:
+                current_player_count = 0
+                current_opponent_count = 0
+
+            if current_player_count > 1:
+                score += 2 ** current_player_count
+
+            if current_opponent_count > 1:
+                score -= 2 ** current_opponent_count
+
+        return score
