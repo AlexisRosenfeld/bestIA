@@ -6,7 +6,7 @@ import interfaces
 
 class GroupeDavid(interfaces.Strategy):
 
-    def __init__(self, depth: int, limit_time: float = 0.95):
+    def __init__(self, depth: int = 10, limit_time: float = 0.95):
         self.depth = depth
         self.limit_time = limit_time
 
@@ -22,6 +22,7 @@ class GroupeDavid(interfaces.Strategy):
         start_time = time.time()
         best_score = -math.inf
         best_move = None
+        score = 0
 
         for column in self.available_columns(current_board):
 
