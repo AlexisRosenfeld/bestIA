@@ -2,35 +2,6 @@ import interfaces
 import copy 
 from interfaces import Token
 
-
-r = Token.RED.value
-y = Token.YELLOW.value
-e = Token.EMPTY.value
-
-at = Token.EMPTY
-ne =0 
-nr = 0 
-ny = 0 
-
-n = 0
-p = 0
-an = 0 
-ap = 0
-
-posr = []
-posy = []
-
-pr = 0 
-py = 0 
-
-dh = [[j for i in range(7)] for j in range(6) ]
-dhp = [[j for i in range(7)] for j in range(5,-1,-1)]
-dv = [[i for i in range(7)] for j in range(6) ]
-dvp = [[i for i in range(6,-1,-1) ] for j in range(6)]
-dp = [[[] for i in range(7)] for j in range(6)]
-dps = [[[] for i in range(7)] for j in range(6)]
-
-
 def mp(arg):
     for i in arg:
         print(i,"\n")
@@ -196,6 +167,8 @@ def calc_mb(b):
     return mb
 
 def calc_pos(m_b):
+    r = Token.RED.value
+    y = Token.YELLOW.value
     posr = []
     posy = []
 
@@ -227,6 +200,9 @@ def calc_p(po, po_a):
                         
 
 def calc_n(mb):
+    r = Token.RED.value
+    y = Token.YELLOW.value
+    e = Token.EMPTY.value
     nr = 0
     ny = 0
     ne = 0
@@ -289,7 +265,7 @@ class GroupeDavidStrategy(interfaces.Strategy):
         return "Alexis Rosenfeld, David Simonet"
 
     def play(self, b: interfaces.Board, t: interfaces.Token) -> int:
-        global ne, nr, ny, posr, posy, pose, pr, py, at , stra, apos, pos, lb, lp,min_max, test2, test3 
+        global lb, lp
 
          
     
@@ -304,15 +280,14 @@ class GroupeDavidStrategy(interfaces.Strategy):
 
         for i in range(2,-1,-1):
             lp.append([])
-
         for i in range(2,-1,-1): 
             for j in lb[i] : 
-                test = calc_mb(j[0][0][0])
-                test1 = calc_pos(test)
-                test2 = calc_p(test1[0],test1[1])
-                test3 = calc_p(test1[1],test1[0])
-                test4 = test2 - test3
-                lp[i].append([test4, j[0][1]])
+                ma_b = calc_mb(j[0][0][0])
+                ma_pos  = calc_pos(ma_b)
+                ma_p1  = calc_p(ma_pos[0],ma_pos[1])
+                ma_p2  = calc_p(ma_pos[1],ma_pos[0])
+                s_fin  = ma_p1 - ma_p2
+                lp[i].append([s_fin, j[0][1]])
 
         min_max = []
         ni = 0
@@ -336,27 +311,4 @@ class GroupeDavidStrategy(interfaces.Strategy):
 
 
         
-
-
-        
-
-
-
-
-
-       
-
-        
-
-        
-
-       
-
-
-       
-
-        
-        
-
-
         return  index_max 
